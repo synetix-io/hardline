@@ -26,12 +26,15 @@ python -m pytest -q
 uvicorn hardline.app:app --reload --port 8080
 ```
 
-Run it on your own machine (opens the same UI at http://127.0.0.1:8080, nothing leaves the box):
+## Run it on your own machine
 
-```bash
-pip install git+https://github.com/synetix-io/hardline
-hardline
-```
+Nothing leaves the box. All three open the same UI at http://127.0.0.1:8080.
+
+| | |
+|---|---|
+| **Download** | [Windows](https://github.com/synetix-io/hardline/releases/latest/download/hardline-windows.exe) · [macOS](https://github.com/synetix-io/hardline/releases/latest/download/hardline-macos) · [Linux](https://github.com/synetix-io/hardline/releases/latest/download/hardline-linux) — double-click (unsigned: SmartScreen asks once) |
+| **Docker** | `docker run --rm -p 8080:8080 ghcr.io/synetix-io/hardline` |
+| **Python** | `pip install git+https://github.com/synetix-io/hardline` then `hardline` |
 
 CLI, same engine:
 

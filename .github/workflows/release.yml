@@ -42,7 +42,7 @@ jobs:
             --add-data "hardline/templates${SEP}hardline/templates" \
             --add-data "hardline/static${SEP}hardline/static" \
             --collect-submodules hardline \
-            hardline/__main__.py
+            launcher.py
           ls -la dist
       - name: Rename asset
         shell: bash

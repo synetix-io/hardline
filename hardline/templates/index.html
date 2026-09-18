@@ -64,14 +64,27 @@
 <div class="local" id="local">
   <div>
     <span class="eyebrow">{% if local %}You are running locally{% else %}Prefer nothing leaves your machine?{% endif %}</span>
-    <h2>{% if local %}Same {{ rules }} checks, same report, no server.{% else %}Run the same {{ rules }} checks on your own machine.{% endif %}</h2>
-    <p>The scanner is a small Python package. <code class="mono">hardline</code> opens this page locally; <code class="mono">hardline scan</code> is the same engine for scripts and CI.</p>
+    <h2>{% if local %}Same {{ rules }} checks, same report, no server.{% else %}Run it on your own machine.{% endif %}</h2>
+    <p>Same {{ rules }} checks, same report, no server. Download, double-click, and this page opens at <code class="mono">127.0.0.1:8080</code>.</p>
+    {% if not local %}
+    <div class="dl">
+      <a class="btn" href="https://github.com/synetix-io/hardline/releases/latest/download/hardline-windows.exe">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>
+        Download for Windows
+      </a>
+      <a class="btn-ghost" href="https://github.com/synetix-io/hardline/releases/latest/download/hardline-macos">macOS</a>
+      <a class="btn-ghost" href="https://github.com/synetix-io/hardline/releases/latest/download/hardline-linux">Linux</a>
+    </div>
+    <p class="small">Unsigned build: Windows SmartScreen asks once — <em>More info → Run anyway</em>. About 20 MB.</p>
+    {% endif %}
   </div>
-  <pre>pip install git+https://github.com/synetix-io/hardline
-hardline                          # opens this app at http://127.0.0.1:8080
-hardline scan router.rsc          # text report in the terminal
-hardline scan router.rsc --json --fail-on high   # CI gate: exit 2 on high/critical
-python -m hardline.cli ...        # if your machine blocks venv .exe shims</pre>
+  <pre># Docker
+docker run --rm -p 8080:8080 ghcr.io/synetix-io/hardline
+
+# Python
+pip install git+https://github.com/synetix-io/hardline
+hardline                          # opens the app locally
+hardline scan router.rsc --json --fail-on high   # CI gate: exit 2 on high/critical</pre>
   <p class="small">Source, rules and the exact regex list used for stripping: <a href="https://github.com/synetix-io/hardline" rel="noopener">github.com/synetix-io/hardline</a> (AGPL-3.0).</p>
 </div>
 {% endblock %}

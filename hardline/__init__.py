@@ -2,7 +2,7 @@
 
 Deterministic rules decide. The model only explains.
 """
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 
 
 def load_dotenv() -> None:
