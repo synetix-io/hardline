@@ -23,6 +23,7 @@
     <a class="nav-link" href="https://synetix.co.za">Synetix</a>
   {% endblock %}</div>
 </nav>
+{% if local %}<div class="local-badge"><span class="dot"></span>Running on this machine · nothing leaves it{% if not ai_available %} · AI summary off{% endif %}</div>{% endif %}
 <main class="main">
 {% block body %}{% endblock %}
 </main>

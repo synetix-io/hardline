@@ -33,10 +33,12 @@ log = logging.getLogger("hardline")
 MAX_BYTES = 2 * 1024 * 1024
 RATE_LIMIT = int(os.environ.get("HARDLINE_RATE_PER_MIN", "20"))
 COUNTER_PATH = Path(os.environ.get("HARDLINE_COUNTER", Path(__file__).parent.parent / "data" / "scans.json"))
+LOCAL = os.environ.get("HARDLINE_LOCAL") == "1"   # `hardline serve`: running on the user's own machine
 
 app = FastAPI(title="Hardline", version=__version__, docs_url=None, redoc_url=None)
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 app.mount("/static", StaticFiles(directory=str(Path(__file__).parent / "static")), name="static")
+templates.env.globals["ai_available"] = os.environ.get("HARDLINE_AI", "1") != "0" and bool(os.environ.get("ANTHROPIC_API_KEY"))
 
 
 # ── security headers ────────────────────────────────────────────────────────
@@ -101,7 +103,7 @@ def _client_ip(request: Request) -> str:
 # ── routes ──────────────────────────────────────────────────────────────────
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse(request, "index.html", {"rules": len(RULES), "version": __version__})
+    return templates.TemplateResponse(request, "index.html", {"rules": len(RULES), "version": __version__, "local": LOCAL})
 
 
 async def _read_input(export_text: str, file: UploadFile | None) -> str:
@@ -132,7 +134,7 @@ async def scan(request: Request, export_text: str = Form(""), file: UploadFile |
                ai: str = Form("1"), client_redacted: str = Form("")):
     if not _allow(_client_ip(request)):
         return templates.TemplateResponse(request, "index.html",
-                                          {"rules": len(RULES), "version": __version__,
+                                          {"rules": len(RULES), "version": __version__, "local": LOCAL,
                                            "error": "Too many scans from this address. Try again in a minute."},
                                           status_code=429)
     try:
@@ -140,10 +142,10 @@ async def scan(request: Request, export_text: str = Form(""), file: UploadFile |
         report = await _scan(text, want_ai=(ai == "1"))
     except ParseError as e:
         return templates.TemplateResponse(request, "index.html",
-                                          {"rules": len(RULES), "version": __version__, "error": str(e)},
+                                          {"rules": len(RULES), "version": __version__, "local": LOCAL, "error": str(e)},
                                           status_code=400)
     return templates.TemplateResponse(request, "report.html",
-                                      {"r": report, "rules": report.rules_run, "version": __version__,
+                                      {"r": report, "rules": report.rules_run, "version": __version__, "local": LOCAL,
                                        "client_redacted": client_redacted if client_redacted.isdigit() else None})
 
 

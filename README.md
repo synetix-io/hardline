@@ -26,6 +26,13 @@ python -m pytest -q
 uvicorn hardline.app:app --reload --port 8080
 ```
 
+Run it on your own machine (opens the same UI at http://127.0.0.1:8080, nothing leaves the box):
+
+```bash
+pip install git+https://github.com/synetix-io/hardline
+hardline
+```
+
 CLI, same engine:
 
 ```bash

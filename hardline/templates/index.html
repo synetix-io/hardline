@@ -63,14 +63,15 @@
 
 <div class="local" id="local">
   <div>
-    <span class="eyebrow">Prefer nothing leaves your machine?</span>
-    <h2>Run the same {{ rules }} checks locally.</h2>
-    <p>The scanner is a small Python package. Same rules, same report, no network — the web page is a convenience, not a requirement.</p>
+    <span class="eyebrow">{% if local %}You are running locally{% else %}Prefer nothing leaves your machine?{% endif %}</span>
+    <h2>{% if local %}Same {{ rules }} checks, same report, no server.{% else %}Run the same {{ rules }} checks on your own machine.{% endif %}</h2>
+    <p>The scanner is a small Python package. <code class="mono">hardline</code> opens this page locally; <code class="mono">hardline scan</code> is the same engine for scripts and CI.</p>
   </div>
   <pre>pip install git+https://github.com/synetix-io/hardline
-hardline scan router.rsc         # text report, nothing leaves this machine
-hardline scan router.rsc --json  # for scripts and CI (exit 2 on critical)
-python -m hardline.cli scan router.rsc   # if your machine blocks venv .exe shims</pre>
+hardline                          # opens this app at http://127.0.0.1:8080
+hardline scan router.rsc          # text report in the terminal
+hardline scan router.rsc --json --fail-on high   # CI gate: exit 2 on high/critical
+python -m hardline.cli ...        # if your machine blocks venv .exe shims</pre>
   <p class="small">Source, rules and the exact regex list used for stripping: <a href="https://github.com/synetix-io/hardline" rel="noopener">github.com/synetix-io/hardline</a> (AGPL-3.0).</p>
 </div>
 {% endblock %}

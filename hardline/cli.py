@@ -1,4 +1,4 @@
-"""`hardline scan router.rsc` — same engine as the web app, for scripts and CI."""
+"""`hardline` opens the app locally. `hardline scan router.rsc` is the same engine for scripts and CI."""
 from __future__ import annotations
 
 import argparse
@@ -9,9 +9,32 @@ from .parser import parse, ParseError
 from .scoring import build_report
 
 
+def serve(port: int = 8080, host: str = "127.0.0.1", open_browser: bool = True) -> int:
+    """Run the web app locally. Nothing leaves this machine unless an Anthropic key is set."""
+    import os
+    import threading
+    import webbrowser
+
+    import uvicorn
+
+    os.environ.setdefault("HARDLINE_LOCAL", "1")
+    url = f"http://{host}:{port}/"
+    print(f"Hardline running locally at {url}  (Ctrl+C to stop)", flush=True)
+    if os.environ.get("HARDLINE_AI", "1") != "0" and not os.environ.get("ANTHROPIC_API_KEY"):
+        print("AI summary: off (no ANTHROPIC_API_KEY). Everything else runs offline.", flush=True)
+    if open_browser:
+        threading.Timer(1.0, lambda: webbrowser.open(url)).start()
+    uvicorn.run("hardline.app:app", host=host, port=port, log_level="warning")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="hardline", description="RouterOS security posture scan")
-    sub = ap.add_subparsers(dest="cmd", required=True)
+    sub = ap.add_subparsers(dest="cmd")
+    sv = sub.add_parser("serve", help="open the web app on this machine (default when no command is given)")
+    sv.add_argument("--port", type=int, default=8080)
+    sv.add_argument("--host", default="127.0.0.1", help="bind address; keep 127.0.0.1 unless you mean to share it")
+    sv.add_argument("--no-browser", action="store_true", help="do not open a browser tab")
     s = sub.add_parser("scan", help="scan a RouterOS /export file")
     s.add_argument("file", help="path to .rsc export, or - for stdin")
     s.add_argument("--json", action="store_true", help="emit JSON instead of text")
@@ -19,6 +42,9 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--fail-on", default="critical", choices=["critical", "high", "medium", "low", "never"],
                    help="exit 2 if a finding at or above this severity exists")
     args = ap.parse_args(argv)
+    if args.cmd in (None, "serve"):
+        return serve(port=getattr(args, "port", 8080), host=getattr(args, "host", "127.0.0.1"),
+                     open_browser=not getattr(args, "no_browser", False))
 
     text = sys.stdin.read() if args.file == "-" else open(args.file, encoding="utf-8", errors="replace").read()
     try:

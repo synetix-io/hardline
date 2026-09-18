@@ -30,6 +30,9 @@ a{color:var(--accent)}a:hover{color:#dcff7a}
 .foot{max-width:1280px;margin:0 auto;padding:20px clamp(16px,4vw,56px) 40px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--muted-2)}
 .foot .mono{font-size:12px}
 
+.local-badge{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 16px;background:#14261a;border-bottom:1px solid #2a4d32;color:#b8f0d0;font-size:13px;font-weight:600}
+.local-badge .dot{width:8px;height:8px;border-radius:999px;background:var(--accent)}
+
 /* buttons */
 .btn{display:inline-flex;align-items:center;gap:10px;height:48px;padding:0 22px;border:0;border-radius:12px;background:var(--accent);color:var(--accent-ink);font:700 16px var(--body);text-decoration:none;cursor:pointer;white-space:nowrap}
 .btn:hover{filter:brightness(1.06);color:var(--accent-ink)}
