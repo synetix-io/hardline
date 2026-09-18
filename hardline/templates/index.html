@@ -69,7 +69,8 @@
   </div>
   <pre>pip install git+https://github.com/synetix-io/hardline
 hardline scan router.rsc         # text report, nothing leaves this machine
-hardline scan router.rsc --json  # for scripts and CI (exit 2 on critical)</pre>
+hardline scan router.rsc --json  # for scripts and CI (exit 2 on critical)
+python -m hardline.cli scan router.rsc   # if your machine blocks venv .exe shims</pre>
   <p class="small">Source, rules and the exact regex list used for stripping: <a href="https://github.com/synetix-io/hardline" rel="noopener">github.com/synetix-io/hardline</a> (AGPL-3.0).</p>
 </div>
 {% endblock %}

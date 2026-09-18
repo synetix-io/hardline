@@ -31,7 +31,10 @@ CLI, same engine:
 ```bash
 hardline scan fixtures/vulnerable.rsc
 hardline scan router.rsc --json --fail-on high     # exit 2 on high/critical — usable in CI
+python -m hardline.cli scan router.rsc             # same thing, for machines that block venv .exe shims
 ```
+
+Install straight from GitHub, no clone: `pip install git+https://github.com/synetix-io/hardline`
 
 AI summary needs an Anthropic credential (`ANTHROPIC_API_KEY` or `ant auth login`). `HARDLINE_AI=0` disables it.
 `HARDLINE_MODEL` overrides the model (default `claude-opus-5`).
