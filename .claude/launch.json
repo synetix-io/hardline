@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "hardline",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "uvicorn", "hardline.app:app", "--port", "8080"],
+      "port": 8080
+    }
+  ]
+}

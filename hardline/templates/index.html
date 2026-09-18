@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block nav %}
+  <a class="nav-link" href="#how">How it works</a>
+  <a class="nav-link" href="#fleet">Fleet</a>
+  <a class="nav-link" href="https://synetix.co.za">Synetix</a>
+{% endblock %}
+{% block body %}
+<div class="hero">
+  <div class="hero-copy">
+    <span class="chip"><span class="dot"></span>Active exploitation · CVE-2026-67276 · CVSS 9.2</span>
+    <h1>Is your MikroTik <span>MikroTrick</span>-exposed?</h1>
+    <p class="lede">Paste your RouterOS export. In ten seconds you get a grade, the exact lines that expose you, and copy-paste fixes written for <em>your</em> interface names — not a generic checklist.</p>
+    <div class="facts">
+      <div class="fact"><b>122,500</b><span>routers with SSH exposed, 5 Sep</span></div>
+      <div class="fact"><b>{{ rules }}</b><span>deterministic checks</span></div>
+      <div class="fact"><b>0</b><span>configs stored. Ever.</span></div>
+    </div>
+    <div class="steps" id="how">
+      <div class="step"><span class="n">1</span><span>Winbox → <code>New Terminal</code> → type <code>/export</code> (RouterOS 6: <code>/export hide-sensitive</code>)</span></div>
+      <div class="step"><span class="n">2</span><span>Paste it here. Passwords never appear in an export; keys, secrets and communities are stripped <em style="color:var(--text);font-style:normal">in your browser</em> before anything is sent.</span></div>
+      <div class="step"><span class="n">3</span><span>Apply the fixes in Safe Mode (Ctrl+X). Lose the session and it rolls back.</span></div>
+    </div>
+  </div>
+
+  <form class="card" method="post" action="/scan" enctype="multipart/form-data">
+    <div class="card-head">
+      <label for="export">Your RouterOS export</label>
+      <span class="count" id="line-count">nothing pasted yet</span>
+    </div>
+    {% if error %}<div class="err" role="alert">{{ error }}</div>{% endif %}
+    <div class="drop" id="drop">
+      <textarea id="export" name="export_text" spellcheck="false" placeholder="# 2026-09-16 10:00:00 by RouterOS 7.19.2&#10;# model = RB5009UG+S+&#10;/interface ethernet&#10;set [ find default-name=ether1 ] name=ether1-wan&#10;/ip service&#10;set telnet disabled=yes"></textarea>
+      <div class="drop-hint"><span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>
+        or drop a .rsc file anywhere in this box
+      </span></div>
+    </div>
+    <div class="file-row">
+      <label for="file">Or upload:</label>
+      <input id="file" type="file" name="file" accept=".rsc,.txt,text/plain">
+    </div>
+    <input type="hidden" name="client_redacted" id="client-redacted" value="">
+    <div class="card-actions">
+      <label class="switch">
+        <input type="checkbox" name="ai" value="1" checked>
+        <span class="track" aria-hidden="true"></span>
+        <span>AI summary <small>· explains findings, never invents them</small></span>
+      </label>
+      <button class="btn" type="submit">
+        Scan my router
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+    <div class="trust">
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Secrets stripped in your browser first</span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Processed in memory, discarded</span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Never connects to your router</span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>No account, no cookies</span>
+    </div>
+  </form>
+</div>
+
+<div class="local" id="local">
+  <div>
+    <span class="eyebrow">Prefer nothing leaves your machine?</span>
+    <h2>Run the same {{ rules }} checks locally.</h2>
+    <p>The scanner is a small Python package. Same rules, same report, no network — the web page is a convenience, not a requirement.</p>
+  </div>
+  <pre>pip install .                    # from the source tree
+hardline scan router.rsc         # text report, nothing leaves this machine
+hardline scan router.rsc --json  # for scripts and CI (exit 2 on critical)</pre>
+  <p class="small">Source and the exact regex list used for stripping: <a href="mailto:hello@synetix.co.za?subject=Hardline%20source">ask</a> — the repository goes public with the first release.</p>
+</div>
+{% endblock %}

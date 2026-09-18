@@ -1,0 +1,32 @@
+# Fly.io config. Deploy: `fly deploy`. App name must be globally unique — change it if taken.
+app = "hardline-synetix"
+primary_region = "jnb"
+
+[build]
+
+[env]
+  HARDLINE_RATE_PER_MIN = "20"
+  HARDLINE_MODEL = "claude-opus-5"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 50
+    hard_limit = 100
+
+[[http_service.checks]]
+  interval = "30s"
+  timeout = "5s"
+  grace_period = "10s"
+  method = "GET"
+  path = "/healthz"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

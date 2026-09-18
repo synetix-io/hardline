@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Hardline — Grade {{ r.grade }} — {{ r.identity or 'router' }}{% endblock %}
+{% set gcol = {'A': 'var(--accent)', 'B': 'var(--accent)', 'C': 'var(--med)', 'D': 'var(--high)', 'F': 'var(--crit)'}[r.grade] %}
+{% set dash = (r.score * 3.016) | round(1) %}
+{% set sev_icon %}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>{% endset %}
+{% set copy_icon %}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>{% endset %}
+{% block nav %}
+  <a class="btn-ghost" href="/"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>Scan another</a>
+  {% if r.findings %}<button class="btn-ghost done" type="button" id="copy-all" style="height:40px">{{ copy_icon }} Copy all fixes</button>{% endif %}
+{% endblock %}
+{% block body %}
+<div class="rep-head">
+  <div class="rep-title">
+    <span class="eyebrow">Scan · {{ r.rules_run }} checks · {{ r.line_count }} lines</span>
+    <h1>{{ r.identity or "Router" }}</h1>
+    <span class="sub">RouterOS {{ r.version or "version unknown" }}{% if r.model %} · {{ r.model }}{% endif %}</span>
+  </div>
+  {% if r.mikrotrick_exposed %}
+  <div class="banner bad">{{ sev_icon }}MikroTrick exposed: YES — RouterOS {{ r.version }} with SSH enabled. Upgrade today.</div>
+  {% elif r.patched is sameas false %}
+  <div class="banner bad">{{ sev_icon }}RouterOS {{ r.version }} is below the September 2026 security release.</div>
+  {% elif r.patched %}
+  <div class="banner ok"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>MikroTrick exposed: no — RouterOS {{ r.version }} is at or above the fixed release.</div>
+  {% else %}
+  <div class="banner unknown">RouterOS version not found in the export — MikroTrick status unknown. Check <code class="mono">/system resource print</code>.</div>
+  {% endif %}
+</div>
+
+{% if client_redacted is not none %}
+<p class="privacy-line">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
+  {% if client_redacted|int > 0 %}{{ client_redacted }} secret value{{ 's' if client_redacted|int != 1 }} stripped in your browser before upload{% else %}No secret values found in the export; nothing needed stripping{% endif %} · processed in memory · already discarded.
+</p>
+{% endif %}
+
+<div class="kpis">
+  <div class="kpi score">
+    <svg width="112" height="112" viewBox="0 0 112 112" role="img" aria-label="Grade {{ r.grade }}, score {{ r.score }} out of 100">
+      <circle cx="56" cy="56" r="48" fill="none" stroke="var(--line)" stroke-width="10"/>
+      <circle cx="56" cy="56" r="48" fill="none" stroke="{{ gcol }}" stroke-width="10" stroke-linecap="round" stroke-dasharray="{{ dash }} 301.6" transform="rotate(-90 56 56)"/>
+      <text x="56" y="70" text-anchor="middle" font-family="Bricolage Grotesque, Geist, sans-serif" font-weight="800" font-size="44" fill="{{ gcol }}" class="letter g-{{ r.grade }}">{{ r.grade }}</text>
+    </svg>
+    <div>
+      <div class="big">{{ r.score }}<small>/100</small></div>
+      <div class="score-note">
+        {% if r.counts.critical %}{{ r.counts.critical }} critical finding{{ 's' if r.counts.critical != 1 }} cap this at D. Fix those first.
+        {% elif r.grade in ('A', 'B') %}Solid. The remaining items are hygiene.
+        {% elif r.mikrotrick_exposed %}Your firewall is carrying you. Upgrade and this moves up fast.
+        {% else %}Nothing critical — the fixes below are address lists and logging.{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="kpi">
+    <div><div class="lbl">Exposure</div><div class="lbl2">Could they get in?</div></div>
+    <div class="row"><span class="big">{{ r.exposure_score }}</span><span class="bar"><i style="width:{{ r.exposure_score }}%;background:{{ 'var(--accent)' if r.exposure_score >= 75 else 'var(--high)' if r.exposure_score >= 40 else 'var(--crit)' }}"></i></span></div>
+  </div>
+  <div class="kpi">
+    <div><div class="lbl">Evidence</div><div class="lbl2">Could you prove it afterwards?</div></div>
+    <div class="row"><span class="big">{{ r.evidence_score }}</span><span class="bar"><i style="width:{{ r.evidence_score }}%;background:{{ 'var(--accent)' if r.evidence_score >= 75 else 'var(--high)' if r.evidence_score >= 40 else 'var(--crit)' }}"></i></span></div>
+  </div>
+  <div class="kpi">
+    <div class="lbl">Findings by severity</div>
+    <div class="sev-grid">
+      <div><b class="c-crit">{{ r.counts.critical }}</b><span>critical</span></div>
+      <div><b class="c-high">{{ r.counts.high }}</b><span>high</span></div>
+      <div><b class="c-med">{{ r.counts.medium }}</b><span>medium</span></div>
+      <div><b class="c-low">{{ r.counts.low }}</b><span>low</span></div>
+    </div>
+  </div>
+</div>
+
+{% if r.ai_summary %}
+<div class="ai">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;margin-top:2px"><path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8z"/><path d="M19 16l.9 2.1L22 19l-2.1.9L19 22l-.9-2.1L16 19l2.1-.9z"/></svg>
+  <div>
+    <span class="eyebrow">Summary · grounded in the findings below, cannot add new ones</span>
+    <p>{{ r.ai_summary }}</p>
+  </div>
+</div>
+{% endif %}
+
+{% if not r.findings %}
+<div class="clean">
+  <h2 class="display" style="margin:0 0 6px;font-size:28px">Clean. {{ r.rules_run }} checks, nothing to report.</h2>
+  <p style="margin:0;color:var(--muted)">Send us the export — we would like to learn what a clean one looks like.</p>
+</div>
+{% else %}
+<div class="toolbar">
+  <div class="seg" role="group" aria-label="Filter by severity">
+    <button type="button" data-filter="all" aria-pressed="true">All · {{ r.findings|length }}</button>
+    {% for sev in ('critical', 'high', 'medium', 'low', 'info') if r.counts[sev] %}
+    <button type="button" data-filter="{{ sev }}" aria-pressed="false">{{ sev|capitalize }} · {{ r.counts[sev] }}</button>
+    {% endfor %}
+  </div>
+  <button type="button" class="linkbtn" id="toggle-all">Expand all</button>
+</div>
+
+<div class="findings">
+{% for f in r.findings %}
+<details class="finding {{ f.severity }}" data-id="{{ f.id }}" data-title="{{ f.title }}"{% if loop.first %} open{% endif %}>
+  <summary>
+    <span class="tag {{ f.severity }}">{{ f.severity }}</span>
+    <span class="id">{{ f.id }}</span>
+    <span class="title">{{ f.title }}</span>
+    <span class="axis">{{ f.axis }}</span>
+    <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--muted-2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+  </summary>
+  <div class="body">
+    <div class="col">
+      <div class="field"><span class="k">Observed</span><p>{{ f.observed }}</p></div>
+      <div class="field"><span class="k">Why it matters</span><p class="why">{{ f.why }}</p></div>
+      {% if f.evidence %}
+      <div class="field"><span class="k">Evidence · {{ f.evidence|length }} line{{ 's' if f.evidence|length != 1 }}</span><code class="evidence">{% for e in f.evidence %}{{ e }}{{ '\n' if not loop.last }}{% endfor %}</code></div>
+      {% endif %}
+      {% if f.refs %}
+      <div class="refs">Refs: {% for ref in f.refs %}{% if ref.startswith('http') %}<a href="{{ ref }}" rel="noopener">{{ ref }}</a>{% else %}{{ ref }}{% endif %}{{ ' · ' if not loop.last }}{% endfor %}</div>
+      {% endif %}
+    </div>
+    <div class="col">
+      <div class="fix-head">
+        <span class="k eyebrow" style="font-size:11px">Fix · paste in Safe Mode</span>
+        <button type="button" class="btn-ghost btn-sm" data-copy="fix-{{ loop.index }}">{{ copy_icon }} Copy fix</button>
+      </div>
+      <pre class="fix" id="fix-{{ loop.index }}">{% for line in f.fix %}{{ line }}{{ '\n' if not loop.last }}{% endfor %}</pre>
+      {% if f.caution %}<div class="caution">{{ sev_icon }}<span>{{ f.caution }}</span></div>{% endif %}
+    </div>
+  </div>
+</details>
+{% endfor %}
+</div>
+{% endif %}
+
+<div class="safe">
+  <span><b style="color:var(--text)">Apply fixes safely.</b> Open a terminal, press <b>Ctrl+X</b> for Safe Mode, paste, confirm you can still reach the router, then Ctrl+X again to commit. Lose the session and it rolls back.</span>
+  <span class="mono" style="font-size:12px">Report discarded when you leave this page</span>
+</div>
+{% endblock %}
