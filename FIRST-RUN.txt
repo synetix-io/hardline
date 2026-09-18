@@ -1,0 +1,11 @@
+Hardline - RouterOS security posture scan (runs on this machine, nothing leaves it)
+
+1. Double-click hardline.exe
+2. Windows SmartScreen will say "Windows protected your PC" the first time,
+   because this build is not code-signed yet.
+   Click "More info" then "Run anyway".
+3. Your browser opens http://127.0.0.1:8080 - paste your /export there.
+4. Close the black window to stop it.
+
+Source and rules: https://github.com/synetix-io/hardline (AGPL-3.0)
+Prefer not to run an unsigned exe? pip install git+https://github.com/synetix-io/hardline  then  hardline

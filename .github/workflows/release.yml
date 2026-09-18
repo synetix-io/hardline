@@ -23,7 +23,7 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            asset: hardline-windows.exe
+            asset: hardline-windows.zip
           - os: macos-latest
             asset: hardline-macos
           - os: ubuntu-latest
@@ -44,15 +44,21 @@ jobs:
             --collect-submodules hardline \
             launcher.py
           ls -la dist
-      - name: Rename asset
-        shell: bash
-        run: |
-          if [[ "$RUNNER_OS" == "Windows" ]]; then mv dist/hardline.exe "dist/${{ matrix.asset }}"; else mv dist/hardline "dist/${{ matrix.asset }}"; fi
       - name: Smoke test
         shell: bash
         run: |
-          chmod +x "dist/${{ matrix.asset }}" || true
-          HARDLINE_AI=0 "./dist/${{ matrix.asset }}" scan fixtures/hardened.rsc
+          BIN=dist/hardline; [[ "$RUNNER_OS" == "Windows" ]] && BIN=dist/hardline.exe
+          chmod +x "$BIN" || true
+          HARDLINE_AI=0 "$BIN" scan fixtures/hardened.rsc
+      - name: Package asset
+        shell: bash
+        run: |
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            cp FIRST-RUN.txt dist/ && (cd dist && 7z a -tzip "${{ matrix.asset }}" hardline.exe FIRST-RUN.txt >/dev/null)
+          else
+            mv dist/hardline "dist/${{ matrix.asset }}"
+          fi
+          ls -la dist
       - uses: actions/upload-artifact@v4
         with: { name: "${{ matrix.asset }}", path: "dist/${{ matrix.asset }}" }
 
@@ -88,7 +94,7 @@ jobs:
           generate_release_notes: true
           body: |
             **Run locally, nothing leaves your machine.**
-            - Windows: download `hardline-windows.exe`, double-click, the app opens at http://127.0.0.1:8080
+            - Windows: download `hardline-windows.zip`, unzip, double-click `hardline.exe` (SmartScreen: More info → Run anyway), the app opens at http://127.0.0.1:8080
             - macOS / Linux: download, `chmod +x hardline-*`, run it
             - Docker: `docker run --rm -p 8080:8080 ghcr.io/synetix-io/hardline`
             - Python: `pip install git+https://github.com/synetix-io/hardline` then `hardline`
