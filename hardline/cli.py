@@ -18,13 +18,14 @@ def serve(port: int = 8080, host: str = "127.0.0.1", open_browser: bool = True) 
     import uvicorn
 
     os.environ.setdefault("HARDLINE_LOCAL", "1")
+    from .app import app  # after the env var so the app sees local mode
     url = f"http://{host}:{port}/"
     print(f"Hardline running locally at {url}  (Ctrl+C to stop)", flush=True)
     if os.environ.get("HARDLINE_AI", "1") != "0" and not os.environ.get("ANTHROPIC_API_KEY"):
         print("AI summary: off (no ANTHROPIC_API_KEY). Everything else runs offline.", flush=True)
     if open_browser:
         threading.Timer(1.0, lambda: webbrowser.open(url)).start()
-    uvicorn.run("hardline.app:app", host=host, port=port, log_level="warning")
+    uvicorn.run(app, host=host, port=port, log_level="warning")
     return 0
 
 
