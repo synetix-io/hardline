@@ -1,6 +1,6 @@
 [project]
 name = "hardline"
-version = "0.1.0"
+version = "0.2.0"
 description = "Paste your RouterOS export. Get a graded security report and a copy-paste fix."
 requires-python = ">=3.11"
 dependencies = [
