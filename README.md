@@ -20,6 +20,7 @@ Live at https://hardline-synetix.fly.dev · built by [Synetix](https://synetix.c
 ## Run
 
 ```bash
+git clone https://github.com/Yukesh-23/hardline && cd hardline
 pip install -e ".[dev]"
 python -m pytest -q
 uvicorn hardline.app:app --reload --port 8080

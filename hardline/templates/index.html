@@ -2,6 +2,7 @@
 {% block nav %}
   <a class="nav-link" href="#how">How it works</a>
   <a class="nav-link" href="#fleet">Fleet</a>
+  <a class="nav-link" href="https://github.com/Yukesh-23/hardline" rel="noopener">Source</a>
   <a class="nav-link" href="https://synetix.co.za">Synetix</a>
 {% endblock %}
 {% block body %}
@@ -66,9 +67,9 @@
     <h2>Run the same {{ rules }} checks locally.</h2>
     <p>The scanner is a small Python package. Same rules, same report, no network — the web page is a convenience, not a requirement.</p>
   </div>
-  <pre>pip install .                    # from the source tree
+  <pre>pip install git+https://github.com/Yukesh-23/hardline
 hardline scan router.rsc         # text report, nothing leaves this machine
 hardline scan router.rsc --json  # for scripts and CI (exit 2 on critical)</pre>
-  <p class="small">Source and the exact regex list used for stripping: <a href="mailto:hello@synetix.co.za?subject=Hardline%20source">ask</a> — the repository goes public with the first release.</p>
+  <p class="small">Source, rules and the exact regex list used for stripping: <a href="https://github.com/Yukesh-23/hardline" rel="noopener">github.com/Yukesh-23/hardline</a> (AGPL-3.0).</p>
 </div>
 {% endblock %}
